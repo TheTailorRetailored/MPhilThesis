@@ -9,7 +9,6 @@
 %\RequirePackage{mathdesign}
 \RequirePackage{float}
 \RequirePackage{tikz,pgfplots}
-\RequirePackage{units}
 \RequirePackage{ifthen}
 \RequirePackage{siunitx}
 \usetikzlibrary{calc}
@@ -110,18 +109,26 @@
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 \newcommand{\Tr}[1]{\mathrm{Tr}\left(#1\right)}
 
+% Map references individually: current cleveref releases can fail when reading
+% the older multi-label form used throughout this thesis.
 \makeatletter
-\newcommand{\myref}[1]{\cref{#1}\mynameref{#1}{\csname r@#1\endcsname}}
-\newcommand{\Myref}[1]{\Cref{#1}\mynameref{#1}{\csname r@#1\endcsname}}
-
-\def\mynameref#1#2{%
-	\begingroup
-	\edef\@mytxt{#2}%
-	\edef\@mytst{\expandafter\@thirdoffive\@mytxt}%
-	\ifx\@mytst\empty\else
-	\space(\nameref{#1})\fi
-	\endgroup
-}
+\newif\ifmyreffirst
+\renewrobustcmd{\cref}[1]{%
+  \myreffirsttrue
+  \@for\myreflabel:=#1\do{%
+    \ifmyreffirst\myreffirstfalse\else, \fi
+    \expandafter\namecref\expandafter{\myreflabel}~\expandafter\ref\expandafter{\myreflabel}}}
+\renewrobustcmd{\Cref}[1]{%
+  \myreffirsttrue
+  \@for\myreflabel:=#1\do{%
+    \ifmyreffirst
+      \expandafter\nameCref\expandafter{\myreflabel}\myreffirstfalse
+    \else
+      , \expandafter\namecref\expandafter{\myreflabel}
+    \fi
+    ~\expandafter\ref\expandafter{\myreflabel}}}
+\newrobustcmd{\myref}[1]{\cref{#1}}
+\newrobustcmd{\Myref}[1]{\Cref{#1}}
 \makeatother
 
 \makeatletter
